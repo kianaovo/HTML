@@ -1,0 +1,1657 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📝 在线备忘录</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <style>
+    /* ========== CSS Variables & Reset ========== */
+    :root {
+      --primary: #6C5CE7;
+      --primary-light: #A29BFE;
+      --primary-dark: #4834D4;
+      --accent: #FD79A8;
+      --bg: #F8F9FD;
+      --card-bg: #FFFFFF;
+      --sidebar-bg: #2D3436;
+      --sidebar-text: #DFE6E9;
+      --text: #2D3436;
+      --text-light: #636E72;
+      --border: #E0E4F0;
+      --shadow: 0 4px 24px rgba(108, 92, 231, 0.08);
+      --shadow-hover: 0 8px 32px rgba(108, 92, 231, 0.16);
+      --radius: 16px;
+      --radius-sm: 10px;
+      --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      --tag-work: #6C5CE7;
+      --tag-personal: #00B894;
+      --tag-urgent: #E17055;
+      --tag-study: #0984E3;
+      --tag-other: #636E72;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ========== Login Page ========== */
+    .login-page {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 20px;
+    }
+
+    .login-card {
+      background: var(--card-bg);
+      border-radius: 20px;
+      padding: 44px 36px 36px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 24px 64px rgba(0, 0, 0, 0.25);
+      animation: slideUp 0.4s ease;
+    }
+
+    .login-card .login-icon {
+      text-align: center;
+      font-size: 3.2rem;
+      margin-bottom: 8px;
+    }
+
+    .login-card h2 {
+      text-align: center;
+      font-size: 1.5rem;
+      margin-bottom: 6px;
+      letter-spacing: -0.3px;
+    }
+
+    .login-card .login-subtitle {
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--text-light);
+      margin-bottom: 28px;
+    }
+
+    .login-card .form-group {
+      margin-bottom: 16px;
+    }
+
+    .login-card .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .login-card .form-group input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 0.95rem;
+      font-family: inherit;
+      outline: none;
+      transition: all var(--transition);
+      background: var(--bg);
+    }
+
+    .login-card .form-group input:focus {
+      border-color: var(--primary-light);
+      box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.07);
+    }
+
+    .login-card .form-group.error input {
+      border-color: #E17055;
+    }
+
+    .login-card .error-text {
+      color: #E17055;
+      font-size: 0.78rem;
+      margin-top: 4px;
+      min-height: 1.2em;
+    }
+
+    .login-card .btn-login {
+      width: 100%;
+      padding: 13px;
+      border-radius: var(--radius-sm);
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: all var(--transition);
+      background: var(--primary);
+      color: #fff;
+      margin-top: 8px;
+    }
+
+    .login-card .btn-login:hover {
+      background: var(--primary-dark);
+      box-shadow: 0 6px 20px rgba(108, 92, 231, 0.4);
+    }
+
+    .login-card .switch-mode {
+      text-align: center;
+      margin-top: 18px;
+      font-size: 0.85rem;
+      color: var(--text-light);
+    }
+
+    .login-card .switch-mode a {
+      color: var(--primary);
+      cursor: pointer;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .login-card .switch-mode a:hover {
+      text-decoration: underline;
+    }
+
+    /* ========== App Layout ========== */
+    .app-layout {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ========== Sidebar ========== */
+    aside.sidebar {
+      width: 260px;
+      min-height: 100vh;
+      background: var(--sidebar-bg);
+      color: var(--sidebar-text);
+      padding: 28px 20px;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      z-index: 100;
+      transition: transform var(--transition);
+    }
+
+    .sidebar-brand {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 32px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      letter-spacing: -0.5px;
+    }
+
+    .sidebar-brand .icon { font-size: 1.8rem; }
+
+    .sidebar-nav { list-style: none; flex: 1; }
+
+    .sidebar-nav li { margin-bottom: 4px; }
+
+    .sidebar-nav a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: var(--radius-sm);
+      color: var(--sidebar-text);
+      text-decoration: none;
+      font-size: 0.95rem;
+      transition: all var(--transition);
+      cursor: pointer;
+      opacity: 0.75;
+    }
+
+    .sidebar-nav a:hover,
+    .sidebar-nav a.active {
+      background: rgba(255, 255, 255, 0.1);
+      opacity: 1;
+    }
+
+    .sidebar-nav a.active {
+      background: var(--primary);
+      font-weight: 600;
+    }
+
+    .sidebar-nav .badge {
+      margin-left: auto;
+      background: rgba(255, 255, 255, 0.15);
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+
+    /* User section in sidebar */
+    .sidebar-user {
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+      padding-top: 16px;
+      margin-top: 12px;
+      margin-bottom: 8px;
+    }
+
+    .sidebar-user .user-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      background: rgba(255, 255, 255, 0.06);
+      margin-bottom: 6px;
+    }
+
+    .sidebar-user .user-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .sidebar-user .user-name {
+      font-weight: 600;
+      font-size: 0.9rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .sidebar-user .user-meta {
+      font-size: 0.7rem;
+      opacity: 0.5;
+    }
+
+    .sidebar-user .btn-logout {
+      width: 100%;
+      padding: 9px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      background: transparent;
+      color: var(--sidebar-text);
+      cursor: pointer;
+      font-size: 0.82rem;
+      font-weight: 500;
+      transition: all var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .sidebar-user .btn-logout:hover {
+      background: rgba(225, 112, 85, 0.25);
+      border-color: rgba(225, 112, 85, 0.4);
+    }
+
+    .sidebar-footer {
+      font-size: 0.72rem;
+      opacity: 0.4;
+      text-align: center;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    /* ========== Main Content ========== */
+    main.main-content {
+      margin-left: 260px;
+      flex: 1;
+      padding: 32px 36px;
+      min-height: 100vh;
+    }
+
+    /* ========== Header ========== */
+    header.page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .page-header h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    /* ========== Search ========== */
+    .search-box { position: relative; }
+
+    .search-box input {
+      padding: 10px 16px 10px 40px;
+      border: 2px solid var(--border);
+      border-radius: 30px;
+      font-size: 0.9rem;
+      width: 240px;
+      outline: none;
+      transition: all var(--transition);
+      background: var(--card-bg);
+    }
+
+    .search-box input:focus {
+      border-color: var(--primary-light);
+      box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.1);
+      width: 280px;
+    }
+
+    .search-box .search-icon {
+      position: absolute;
+      left: 14px; top: 50%;
+      transform: translateY(-50%);
+      font-size: 1rem;
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
+    /* ========== Stats Cards ========== */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .stat-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transition: all var(--transition);
+      cursor: pointer;
+      border: 2px solid transparent;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-hover);
+    }
+
+    .stat-card.selected { border-color: var(--primary); }
+
+    .stat-card .stat-icon {
+      width: 48px; height: 48px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      flex-shrink: 0;
+    }
+
+    .stat-card .stat-icon.all     { background: #EDE7F6; color: var(--primary); }
+    .stat-card .stat-icon.work    { background: #E8EAF6; color: #5C6BC0; }
+    .stat-card .stat-icon.personal{ background: #E0F2F1; color: #00897B; }
+    .stat-card .stat-icon.urgent  { background: #FBE9E7; color: #E64A19; }
+    .stat-card .stat-icon.study   { background: #E3F2FD; color: #1565C0; }
+
+    .stat-card .stat-info .stat-num {
+      font-size: 1.5rem; font-weight: 700; line-height: 1.1;
+    }
+    .stat-card .stat-info .stat-label {
+      font-size: 0.8rem; color: var(--text-light);
+    }
+
+    /* ========== Toolbar ========== */
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .filter-tags {
+      display: flex; gap: 8px; flex-wrap: wrap;
+    }
+
+    .filter-tag {
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 0.82rem; font-weight: 500;
+      cursor: pointer;
+      border: 2px solid var(--border);
+      background: var(--card-bg);
+      transition: all var(--transition);
+      user-select: none;
+    }
+
+    .filter-tag:hover { border-color: var(--primary-light); }
+    .filter-tag.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+
+    .toolbar-right {
+      display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+    }
+
+    .sort-btn, .export-btn {
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      border: 2px solid var(--border);
+      background: var(--card-bg);
+      transition: all var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .sort-btn:hover, .export-btn:hover { border-color: var(--primary-light); }
+    .export-btn { color: #00B894; border-color: #00B89433; }
+    .export-btn:hover { background: #E0F2F1; border-color: #00B894; }
+
+    /* ========== Memo Grid ========== */
+    .memo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 20px;
+    }
+
+    .memo-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+      transition: all var(--transition);
+      border-left: 5px solid var(--primary);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      animation: fadeInUp 0.4s ease both;
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .memo-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-hover);
+    }
+
+    .memo-card.tag-work     { border-left-color: var(--tag-work); }
+    .memo-card.tag-personal { border-left-color: var(--tag-personal); }
+    .memo-card.tag-urgent   { border-left-color: var(--tag-urgent); }
+    .memo-card.tag-study    { border-left-color: var(--tag-study); }
+    .memo-card.tag-other    { border-left-color: var(--tag-other); }
+
+    .memo-card.completed { opacity: 0.6; }
+    .memo-card.completed .memo-title { text-decoration: line-through; }
+
+    .memo-card .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .memo-card .memo-title {
+      font-size: 1.1rem; font-weight: 600;
+      line-height: 1.4;
+      word-break: break-word;
+      flex: 1;
+    }
+
+    .memo-card .card-actions {
+      display: flex; gap: 2px; flex-shrink: 0;
+    }
+
+    .memo-card .card-actions button {
+      width: 30px; height: 30px;
+      border-radius: 7px;
+      border: none;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: all var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+    }
+
+    .btn-complete   { color: #00B894; }
+    .btn-complete:hover { background: #E0F2F1; }
+    .btn-edit       { color: var(--primary); }
+    .btn-edit:hover { background: #EDE7F6; }
+    .btn-export     { color: #0984E3; }
+    .btn-export:hover { background: #E3F2FD; }
+    .btn-delete     { color: #E17055; }
+    .btn-delete:hover { background: #FBE9E7; }
+
+    .memo-card .memo-body {
+      font-size: 0.9rem; color: var(--text-light);
+      line-height: 1.6;
+      max-height: 80px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .memo-card .memo-body::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 30px;
+      background: linear-gradient(transparent, var(--card-bg));
+    }
+
+    .memo-card .memo-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.75rem;
+      color: var(--text-light);
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .memo-card .memo-tag {
+      padding: 3px 12px;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+    }
+
+    .memo-tag.tag-work     { background: #EDE7F6; color: var(--tag-work); }
+    .memo-tag.tag-personal { background: #E0F2F1; color: var(--tag-personal); }
+    .memo-tag.tag-urgent   { background: #FBE9E7; color: var(--tag-urgent); }
+    .memo-tag.tag-study    { background: #E3F2FD; color: var(--tag-study); }
+    .memo-tag.tag-other    { background: #F1F2F6; color: var(--tag-other); }
+
+    /* ========== Empty State ========== */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      grid-column: 1 / -1;
+    }
+    .empty-state .empty-icon { font-size: 4rem; margin-bottom: 16px; opacity: 0.6; }
+    .empty-state h3 { font-size: 1.2rem; color: var(--text-light); margin-bottom: 8px; }
+    .empty-state p  { color: var(--text-light); opacity: 0.6; font-size: 0.9rem; }
+
+    /* ========== FAB ========== */
+    .fab {
+      position: fixed;
+      bottom: 36px; right: 36px;
+      width: 60px; height: 60px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      font-size: 1.8rem;
+      cursor: pointer;
+      box-shadow: 0 6px 24px rgba(108, 92, 231, 0.35);
+      transition: all var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+    }
+
+    .fab:hover {
+      background: var(--primary-dark);
+      transform: scale(1.1);
+      box-shadow: 0 8px 32px rgba(108, 92, 231, 0.5);
+    }
+
+    /* ========== Modal ========== */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      animation: fadeIn 0.2s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    .modal {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 32px;
+      width: 90%;
+      max-width: 520px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+      animation: slideUp 0.3s ease;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .modal h2 {
+      font-size: 1.3rem;
+      margin-bottom: 24px;
+      letter-spacing: -0.3px;
+    }
+
+    .form-group { margin-bottom: 18px; }
+
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--text);
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 0.95rem;
+      font-family: inherit;
+      outline: none;
+      transition: all var(--transition);
+      background: var(--bg);
+      resize: vertical;
+    }
+
+    .form-group textarea { min-height: 100px; }
+
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      border-color: var(--primary-light);
+      box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.07);
+    }
+
+    .form-group .error-text {
+      color: #E17055;
+      font-size: 0.78rem;
+      margin-top: 4px;
+      min-height: 1.2em;
+    }
+
+    .form-group.error input,
+    .form-group.error textarea {
+      border-color: #E17055;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      margin-top: 24px;
+    }
+
+    /* ========== Buttons ========== */
+    .btn {
+      padding: 10px 24px;
+      border-radius: var(--radius-sm);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+    }
+    .btn-primary:hover {
+      background: var(--primary-dark);
+      box-shadow: 0 4px 16px rgba(108, 92, 231, 0.35);
+    }
+
+    .btn-secondary {
+      background: var(--border);
+      color: var(--text);
+    }
+    .btn-secondary:hover { background: #D0D5E8; }
+
+    .btn-danger {
+      background: #E17055;
+      color: #fff;
+    }
+    .btn-danger:hover { background: #D63031; }
+
+    /* ========== Toast ========== */
+    .toast-container {
+      position: fixed;
+      top: 24px; right: 24px;
+      z-index: 2000;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .toast {
+      padding: 14px 22px;
+      border-radius: var(--radius-sm);
+      color: #fff;
+      font-size: 0.9rem;
+      font-weight: 500;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.18);
+      animation: slideInRight 0.35s ease, fadeOutToast 0.3s ease forwards;
+      animation-delay: 0s, 2.2s;
+      max-width: 360px;
+    }
+
+    .toast.success { background: #00B894; }
+    .toast.error   { background: #E17055; }
+    .toast.info    { background: #0984E3; }
+
+    @keyframes slideInRight {
+      from { opacity: 0; transform: translateX(40px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes fadeOutToast {
+      from { opacity: 1; }
+      to   { opacity: 0; transform: translateY(-10px); }
+    }
+
+    /* ========== Confirm Dialog ========== */
+    .confirm-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1500;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .confirm-dialog {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 28px;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+      max-width: 400px;
+      width: 90%;
+    }
+    .confirm-dialog .confirm-icon { font-size: 3rem; margin-bottom: 12px; }
+    .confirm-dialog p { margin-bottom: 20px; font-size: 1rem; color: var(--text-light); }
+    .confirm-dialog .confirm-actions { display: flex; gap: 12px; justify-content: center; }
+
+    /* ========== Responsive ========== */
+    @media (max-width: 768px) {
+      aside.sidebar {
+        transform: translateX(-100%);
+      }
+      aside.sidebar.open {
+        transform: translateX(0);
+      }
+
+      main.main-content {
+        margin-left: 0;
+        padding: 20px 16px;
+      }
+
+      .memo-grid { grid-template-columns: 1fr; }
+
+      .search-box input { width: 160px; }
+      .search-box input:focus { width: 190px; }
+
+      .fab {
+        bottom: 20px; right: 20px;
+        width: 52px; height: 52px;
+        font-size: 1.5rem;
+      }
+
+      .mobile-menu-btn { display: flex !important; }
+
+      .page-header h1 { font-size: 1.3rem; }
+    }
+
+    .mobile-menu-btn {
+      display: none;
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      border: none;
+      background: var(--card-bg);
+      cursor: pointer;
+      font-size: 1.3rem;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow);
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <!-- ========== LOGIN PAGE ========== -->
+    <div v-if="!currentUser" class="login-page">
+      <div class="login-card">
+        <div class="login-icon">📝</div>
+        <h2>{{ loginMode === 'login' ? '欢迎回来' : '创建账户' }}</h2>
+        <p class="login-subtitle">
+          {{ loginMode === 'login' ? '登录以查看你的备忘录' : '注册一个新账户开始使用' }}
+        </p>
+        <form @submit.prevent="handleAuth">
+          <div class="form-group" :class="{ error: authErrors.username }">
+            <label for="loginUser">用户名</label>
+            <input
+              id="loginUser"
+              type="text"
+              v-model="authForm.username"
+              placeholder="请输入用户名（至少2个字符）"
+              maxlength="20"
+              autocomplete="username"
+              @input="authErrors.username = ''"
+            >
+            <div class="error-text">{{ authErrors.username }}</div>
+          </div>
+
+          <div class="form-group" :class="{ error: authErrors.password }">
+            <label for="loginPass">密码</label>
+            <input
+              id="loginPass"
+              type="password"
+              v-model="authForm.password"
+              placeholder="请输入密码（至少4个字符）"
+              maxlength="30"
+              autocomplete="current-password"
+              @input="authErrors.password = ''"
+            >
+            <div class="error-text">{{ authErrors.password }}</div>
+          </div>
+
+          <div v-if="loginMode === 'register'" class="form-group" :class="{ error: authErrors.confirm }">
+            <label for="loginConfirm">确认密码</label>
+            <input
+              id="loginConfirm"
+              type="password"
+              v-model="authForm.confirm"
+              placeholder="请再次输入密码"
+              maxlength="30"
+              autocomplete="new-password"
+              @input="authErrors.confirm = ''"
+            >
+            <div class="error-text">{{ authErrors.confirm }}</div>
+          </div>
+
+          <button type="submit" class="btn-login">
+            {{ loginMode === 'login' ? '🔐 登 录' : '✨ 注 册' }}
+          </button>
+        </form>
+        <div class="switch-mode">
+          <template v-if="loginMode === 'login'">
+            还没有账户？<a @click="switchLoginMode('register')">立即注册</a>
+          </template>
+          <template v-else>
+            已有账户？<a @click="switchLoginMode('login')">立即登录</a>
+          </template>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== MAIN APP ========== -->
+    <div v-else class="app-layout">
+      <!-- Sidebar -->
+      <aside class="sidebar" :class="{ open: sidebarOpen }">
+        <div class="sidebar-brand">
+          <span class="icon">📝</span> 备忘录
+        </div>
+        <ul class="sidebar-nav">
+          <li>
+            <a :class="{ active: currentView === 'all' }" @click="switchView('all')">
+              📋 全部备忘 <span class="badge">{{ memos.length }}</span>
+            </a>
+          </li>
+          <li>
+            <a :class="{ active: currentView === 'active' }" @click="switchView('active')">
+              ✅ 进行中 <span class="badge">{{ activeCount }}</span>
+            </a>
+          </li>
+          <li>
+            <a :class="{ active: currentView === 'completed' }" @click="switchView('completed')">
+              ✔️ 已完成 <span class="badge">{{ completedCount }}</span>
+            </a>
+          </li>
+          <li>
+            <a :class="{ active: currentView === 'urgent' }" @click="switchView('urgent')">
+              🔥 紧急事项 <span class="badge">{{ urgentCount }}</span>
+            </a>
+          </li>
+        </ul>
+
+        <!-- User section -->
+        <div class="sidebar-user">
+          <div class="user-info">
+            <div class="user-avatar">{{ currentUser.charAt(0).toUpperCase() }}</div>
+            <div>
+              <div class="user-name">{{ currentUser }}</div>
+              <div class="user-meta">{{ memos.length }} 条备忘</div>
+            </div>
+          </div>
+          <button class="btn-logout" @click="handleLogout">🚪 退出登录</button>
+        </div>
+
+        <div class="sidebar-footer">备忘录 v2.0 · 多用户 · 本地存储</div>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <!-- Header -->
+        <header class="page-header">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <button class="mobile-menu-btn" @click="sidebarOpen = !sidebarOpen">☰</button>
+            <h1>{{ pageTitle }}</h1>
+          </div>
+          <div class="header-actions">
+            <div class="search-box">
+              <span class="search-icon">🔍</span>
+              <input type="text" v-model="searchQuery" placeholder="搜索备忘录...">
+            </div>
+            <button class="btn btn-primary" @click="openAddModal">✚ 新建</button>
+          </div>
+        </header>
+
+        <!-- Stats Cards -->
+        <section class="stats-row">
+          <div class="stat-card" :class="{ selected: filterTag === '全部' }" @click="filterTag = '全部'">
+            <div class="stat-icon all">📋</div>
+            <div class="stat-info">
+              <div class="stat-num">{{ memos.length }}</div>
+              <div class="stat-label">全部备忘</div>
+            </div>
+          </div>
+          <div class="stat-card" :class="{ selected: filterTag === '工作' }" @click="filterTag = '工作'">
+            <div class="stat-icon work">💼</div>
+            <div class="stat-info">
+              <div class="stat-num">{{ tagCounts['工作'] }}</div>
+              <div class="stat-label">工作</div>
+            </div>
+          </div>
+          <div class="stat-card" :class="{ selected: filterTag === '个人' }" @click="filterTag = '个人'">
+            <div class="stat-icon personal">🏠</div>
+            <div class="stat-info">
+              <div class="stat-num">{{ tagCounts['个人'] }}</div>
+              <div class="stat-label">个人</div>
+            </div>
+          </div>
+          <div class="stat-card" :class="{ selected: filterTag === '紧急' }" @click="filterTag = '紧急'">
+            <div class="stat-icon urgent">🔥</div>
+            <div class="stat-info">
+              <div class="stat-num">{{ tagCounts['紧急'] }}</div>
+              <div class="stat-label">紧急</div>
+            </div>
+          </div>
+          <div class="stat-card" :class="{ selected: filterTag === '学习' }" @click="filterTag = '学习'">
+            <div class="stat-icon study">📚</div>
+            <div class="stat-info">
+              <div class="stat-num">{{ tagCounts['学习'] }}</div>
+              <div class="stat-label">学习</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Toolbar -->
+        <section class="toolbar">
+          <div class="filter-tags">
+            <span
+              v-for="tag in allTags"
+              :key="tag"
+              class="filter-tag"
+              :class="{ active: filterTag === tag }"
+              @click="filterTag = tag"
+            >{{ tag }}</span>
+          </div>
+          <div class="toolbar-right">
+            <button class="export-btn" @click="exportAllMemos" title="导出全部备忘为文本文件">
+              📥 导出全部
+            </button>
+            <button class="sort-btn" @click="toggleSort">
+              {{ sortBy === 'newest' ? '🕐 最新优先' : '📅 最早优先' }}
+            </button>
+          </div>
+        </section>
+
+        <!-- Memo Grid -->
+        <section class="memo-grid">
+          <template v-if="filteredMemos.length > 0">
+            <article
+              v-for="(memo, idx) in filteredMemos"
+              :key="memo.id"
+              class="memo-card"
+              :class="['tag-' + memo.tag, { completed: memo.completed }]"
+              :style="{ animationDelay: (idx * 0.05) + 's' }"
+            >
+              <div class="card-header">
+                <h3 class="memo-title">{{ memo.title }}</h3>
+                <div class="card-actions">
+                  <button class="btn-complete" :title="memo.completed ? '标记为未完成' : '标记为已完成'" @click="toggleComplete(memo.id)">{{ memo.completed ? '↩️' : '✅' }}</button>
+                  <button class="btn-edit" title="编辑" @click="openEditModal(memo)">✏️</button>
+                  <button class="btn-export" title="导出为文本" @click="exportMemo(memo)">📥</button>
+                  <button class="btn-delete" title="删除" @click="confirmDelete(memo.id)">🗑️</button>
+                </div>
+              </div>
+              <p class="memo-body">{{ memo.content }}</p>
+              <div class="memo-meta">
+                <span class="memo-tag" :class="'tag-' + memo.tag">{{ tagLabels[memo.tag] }}</span>
+                <span>{{ formatDate(memo.updatedAt) }}</span>
+              </div>
+            </article>
+          </template>
+          <div v-else class="empty-state">
+            <div class="empty-icon">📭</div>
+            <h3>暂无备忘</h3>
+            <p>点击右下角的 + 按钮或"新建"按钮来添加你的第一条备忘吧！</p>
+          </div>
+        </section>
+      </main>
+
+      <!-- FAB -->
+      <button class="fab" @click="openAddModal" title="新建备忘">+</button>
+
+      <!-- Add/Edit Modal -->
+      <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
+        <form class="modal" @submit.prevent="saveMemo">
+          <h2>{{ isEditing ? '✏️ 编辑备忘' : '📝 新建备忘' }}</h2>
+
+          <div class="form-group" :class="{ error: errors.title }">
+            <label for="memoTitle">标题 *</label>
+            <input id="memoTitle" type="text" v-model="form.title" placeholder="请输入备忘标题..." maxlength="60" @input="errors.title = ''">
+            <span class="error-text">{{ errors.title }}</span>
+          </div>
+
+          <div class="form-group" :class="{ error: errors.content }">
+            <label for="memoContent">内容 *</label>
+            <textarea id="memoContent" v-model="form.content" placeholder="请输入备忘内容..." maxlength="500" @input="errors.content = ''"></textarea>
+            <span class="error-text">{{ errors.content }}</span>
+          </div>
+
+          <div class="form-group">
+            <label for="memoTag">分类标签</label>
+            <select id="memoTag" v-model="form.tag">
+              <option value="工作">💼 工作</option>
+              <option value="个人">🏠 个人</option>
+              <option value="紧急">🔥 紧急</option>
+              <option value="学习">📚 学习</option>
+              <option value="其他">📌 其他</option>
+            </select>
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" @click="closeModal">取消</button>
+            <button type="submit" class="btn btn-primary">
+              {{ isEditing ? '💾 保存修改' : '✅ 创建备忘' }}
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Confirm Delete Dialog -->
+      <div v-if="showConfirm" class="confirm-overlay" @click.self="showConfirm = false">
+        <div class="confirm-dialog">
+          <div class="confirm-icon">⚠️</div>
+          <p>确定要删除这条备忘吗？<br><small>此操作不可撤销。</small></p>
+          <div class="confirm-actions">
+            <button class="btn btn-secondary" @click="showConfirm = false">取消</button>
+            <button class="btn btn-danger" @click="doDelete">确认删除</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Toast Container -->
+      <div class="toast-container">
+        <div v-for="toast in toasts" :key="toast.id" class="toast" :class="toast.type">{{ toast.message }}</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const { createApp, ref, computed, watch, onMounted, nextTick } = Vue;
+
+    createApp({
+      setup() {
+        // ==================== AUTH STATE ====================
+        const USERS_KEY = 'memo-app-users';
+        const SESSION_KEY = 'memo-app-session';
+
+        const currentUser = ref(null);          // string: current username, null = not logged in
+        const loginMode = ref('login');         // 'login' | 'register'
+        const authForm = ref({ username: '', password: '', confirm: '' });
+        const authErrors = ref({ username: '', password: '', confirm: '' });
+
+        // ==================== MEMO STATE ====================
+        const memos = ref([]);
+        const searchQuery = ref('');
+        const filterTag = ref('全部');
+        const sortBy = ref('newest');
+        const currentView = ref('all');
+        const sidebarOpen = ref(false);
+
+        // Modal state
+        const showModal = ref(false);
+        const isEditing = ref(false);
+        const editingId = ref(null);
+        const form = ref({ title: '', content: '', tag: '工作' });
+        const errors = ref({ title: '', content: '' });
+
+        // Confirm dialog
+        const showConfirm = ref(false);
+        const deleteTargetId = ref(null);
+
+        // Toast
+        const toasts = ref([]);
+        let toastIdCounter = 0;
+
+        // ==================== CONSTANTS ====================
+        const allTags = ['全部', '工作', '个人', '紧急', '学习', '其他'];
+        const tagLabels = {
+          '工作': '💼 工作', '个人': '🏠 个人', '紧急': '🔥 紧急',
+          '学习': '📚 学习', '其他': '📌 其他',
+        };
+
+        // ==================== COMPUTED ====================
+        const activeCount    = computed(() => memos.value.filter(m => !m.completed).length);
+        const completedCount = computed(() => memos.value.filter(m => m.completed).length);
+        const urgentCount    = computed(() => memos.value.filter(m => m.tag === '紧急' && !m.completed).length);
+
+        const tagCounts = computed(() => {
+          const counts = {};
+          allTags.slice(1).forEach(tag => {
+            counts[tag] = memos.value.filter(m => m.tag === tag).length;
+          });
+          return counts;
+        });
+
+        const pageTitle = computed(() => {
+          const titles = {
+            all: '📋 全部备忘', active: '✅ 进行中的备忘',
+            completed: '✔️ 已完成的备忘', urgent: '🔥 紧急事项',
+          };
+          return titles[currentView.value] || '📋 全部备忘';
+        });
+
+        const filteredMemos = computed(() => {
+          let result = [...memos.value];
+
+          if (currentView.value === 'active')    result = result.filter(m => !m.completed);
+          else if (currentView.value === 'completed') result = result.filter(m => m.completed);
+          else if (currentView.value === 'urgent')    result = result.filter(m => m.tag === '紧急' && !m.completed);
+
+          if (filterTag.value !== '全部') result = result.filter(m => m.tag === filterTag.value);
+
+          if (searchQuery.value.trim()) {
+            const q = searchQuery.value.trim().toLowerCase();
+            result = result.filter(m => m.title.toLowerCase().includes(q) || m.content.toLowerCase().includes(q));
+          }
+
+          result.sort((a, b) => sortBy.value === 'newest' ? b.createdAt - a.createdAt : a.createdAt - b.createdAt);
+          return result;
+        });
+
+        // ==================== STORAGE HELPERS ====================
+        function getStorageKey() {
+          return currentUser.value ? `memo-app-data-${hashStr(currentUser.value)}` : null;
+        }
+
+        function getUsers() {
+          try {
+            const raw = localStorage.getItem(USERS_KEY);
+            return raw ? JSON.parse(raw) : {};
+          } catch { return {}; }
+        }
+
+        function saveUsers(users) {
+          localStorage.setItem(USERS_KEY, JSON.stringify(users));
+        }
+
+        // Simple string hash for storage key (not cryptographic — used only as a key suffix)
+        function hashStr(str) {
+          let h = 0;
+          for (let i = 0; i < str.length; i++) {
+            h = ((h << 5) - h) + str.charCodeAt(i);
+            h |= 0;
+          }
+          return Math.abs(h).toString(36);
+        }
+
+        // Simple password hash (SHA-256 via SubtleCrypto when available, fallback otherwise)
+        async function hashPassword(password) {
+          if (window.crypto && window.crypto.subtle) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode('memo-salt-' + password);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+          }
+          // Fallback — not secure but functional for this demo
+          let h = 0;
+          const s = 'memo-salt-' + password;
+          for (let i = 0; i < s.length; i++) {
+            h = ((h << 5) - h) + s.charCodeAt(i);
+            h |= 0;
+          }
+          return Math.abs(h).toString(36) + '_' + Date.now().toString(36);
+        }
+
+        // ==================== AUTH METHODS ====================
+        function switchLoginMode(mode) {
+          loginMode.value = mode;
+          authForm.value = { username: '', password: '', confirm: '' };
+          authErrors.value = { username: '', password: '', confirm: '' };
+        }
+
+        function validateAuth() {
+          let valid = true;
+          authErrors.value = { username: '', password: '', confirm: '' };
+
+          const uname = authForm.value.username.trim();
+          const pass = authForm.value.password;
+          const confirm = authForm.value.confirm;
+
+          if (!uname) {
+            authErrors.value.username = '请输入用户名';
+            valid = false;
+          } else if (uname.length < 2) {
+            authErrors.value.username = '用户名至少需要 2 个字符';
+            valid = false;
+          } else if (!/^[\w一-龥]+$/.test(uname)) {
+            authErrors.value.username = '用户名只能包含中文、英文、数字和下划线';
+            valid = false;
+          }
+
+          if (!pass) {
+            authErrors.value.password = '请输入密码';
+            valid = false;
+          } else if (pass.length < 4) {
+            authErrors.value.password = '密码至少需要 4 个字符';
+            valid = false;
+          }
+
+          if (loginMode.value === 'register') {
+            if (!confirm) {
+              authErrors.value.confirm = '请确认密码';
+              valid = false;
+            } else if (pass !== confirm) {
+              authErrors.value.confirm = '两次输入的密码不一致';
+              valid = false;
+            }
+          }
+
+          return valid;
+        }
+
+        async function handleAuth() {
+          if (!validateAuth()) return;
+
+          const uname = authForm.value.username.trim();
+          const pass = authForm.value.password;
+          const users = getUsers();
+
+          if (loginMode.value === 'register') {
+            if (users[uname]) {
+              authErrors.value.username = '该用户名已被注册';
+              return;
+            }
+            const hashedPw = await hashPassword(pass);
+            users[uname] = { passwordHash: hashedPw, createdAt: Date.now() };
+            saveUsers(users);
+            doLogin(uname);
+            showToast('🎉 注册成功，欢迎使用！', 'success');
+          } else {
+            // login
+            if (!users[uname]) {
+              authErrors.value.username = '用户不存在';
+              return;
+            }
+            const hashedInput = await hashPassword(pass);
+            if (users[uname].passwordHash !== hashedInput) {
+              authErrors.value.password = '密码错误';
+              return;
+            }
+            doLogin(uname);
+            showToast('👋 欢迎回来，' + uname + '！', 'success');
+          }
+        }
+
+        function doLogin(username) {
+          currentUser.value = username;
+          localStorage.setItem(SESSION_KEY, username);
+          loadMemos();
+        }
+
+        function handleLogout() {
+          currentUser.value = null;
+          memos.value = [];
+          localStorage.removeItem(SESSION_KEY);
+          searchQuery.value = '';
+          filterTag.value = '全部';
+          sortBy.value = 'newest';
+          currentView.value = 'all';
+          showToast('已安全退出', 'info');
+        }
+
+        // ==================== MEMO CRUD ====================
+        function generateId() {
+          return Date.now().toString(36) + Math.random().toString(36).substring(2, 8);
+        }
+
+        function loadMemos() {
+          const key = getStorageKey();
+          if (!key) return;
+          try {
+            const data = localStorage.getItem(key);
+            if (data) {
+              memos.value = JSON.parse(data);
+            } else {
+              // Seed with sample data for new users
+              const now = Date.now();
+              memos.value = [
+                { id: generateId(), title: '完成项目需求文档', content: '整理并撰写Q3季度项目需求文档，包括功能列表、技术方案和排期计划。', tag: '工作', completed: false, createdAt: now - 3600000 * 5, updatedAt: now - 3600000 * 2 },
+                { id: generateId(), title: '购买周末聚会食材', content: '需要购买：牛排、蔬菜沙拉、饮料、水果。地点：社区超市。', tag: '个人', completed: false, createdAt: now - 3600000 * 8, updatedAt: now - 3600000 * 3 },
+                { id: generateId(), title: '周三前完成代码审查', content: 'Review 同事提交的 PR #234 和 PR #238，关注安全性和性能问题。', tag: '紧急', completed: false, createdAt: now - 3600000 * 2, updatedAt: now - 3600000 * 1 },
+                { id: generateId(), title: '学习 Vue3 Composition API', content: '阅读官方文档中关于 setup、ref、reactive、computed、watch 等核心概念的章节，并完成练习项目。', tag: '学习', completed: true, createdAt: now - 3600000 * 24, updatedAt: now - 3600000 * 6 },
+              ];
+              saveMemos();
+            }
+          } catch (e) {
+            console.error('加载数据失败:', e);
+            memos.value = [];
+          }
+        }
+
+        function saveMemos() {
+          const key = getStorageKey();
+          if (!key) return;
+          try {
+            localStorage.setItem(key, JSON.stringify(memos.value));
+          } catch (e) {
+            showToast('存储空间不足，请清理旧数据', 'error');
+          }
+        }
+
+        watch(memos, () => { saveMemos(); }, { deep: true });
+
+        // ==================== MEMO ACTIONS ====================
+        function switchView(view) {
+          currentView.value = view;
+          filterTag.value = '全部';
+          sidebarOpen.value = false;
+        }
+
+        function toggleSort() {
+          sortBy.value = sortBy.value === 'newest' ? 'oldest' : 'newest';
+        }
+
+        function formatDate(timestamp) {
+          const d = new Date(timestamp);
+          const now = new Date();
+          const diffMins = Math.floor((now - d) / 60000);
+          const diffHours = Math.floor((now - d) / 3600000);
+          const diffDays = Math.floor((now - d) / 86400000);
+
+          if (diffMins < 1)  return '刚刚';
+          if (diffMins < 60) return diffMins + ' 分钟前';
+          if (diffHours < 24) return diffHours + ' 小时前';
+          if (diffDays < 7)  return diffDays + ' 天前';
+
+          const y = d.getFullYear();
+          const m = String(d.getMonth() + 1).padStart(2, '0');
+          const day = String(d.getDate()).padStart(2, '0');
+          return `${y}-${m}-${day}`;
+        }
+
+        // ==================== MODAL ====================
+        function openAddModal() {
+          isEditing.value = false;
+          editingId.value = null;
+          form.value = { title: '', content: '', tag: '工作' };
+          errors.value = { title: '', content: '' };
+          showModal.value = true;
+          nextTick(() => document.getElementById('memoTitle')?.focus());
+        }
+
+        function openEditModal(memo) {
+          isEditing.value = true;
+          editingId.value = memo.id;
+          form.value = { title: memo.title, content: memo.content, tag: memo.tag };
+          errors.value = { title: '', content: '' };
+          showModal.value = true;
+          nextTick(() => document.getElementById('memoTitle')?.focus());
+        }
+
+        function closeModal() { showModal.value = false; }
+
+        function validateForm() {
+          let valid = true;
+          errors.value = { title: '', content: '' };
+
+          const title = form.value.title.trim();
+          const content = form.value.content.trim();
+
+          if (!title) {
+            errors.value.title = '请输入备忘标题';
+            valid = false;
+          } else if (title.length < 2) {
+            errors.value.title = '标题至少需要 2 个字符';
+            valid = false;
+          }
+
+          if (!content) {
+            errors.value.content = '请输入备忘内容';
+            valid = false;
+          } else if (content.length < 3) {
+            errors.value.content = '内容至少需要 3 个字符';
+            valid = false;
+          }
+
+          return valid;
+        }
+
+        function saveMemo() {
+          if (!validateForm()) return;
+          const now = Date.now();
+          if (isEditing.value) {
+            const idx = memos.value.findIndex(m => m.id === editingId.value);
+            if (idx !== -1) {
+              memos.value[idx] = {
+                ...memos.value[idx],
+                title: form.value.title.trim(),
+                content: form.value.content.trim(),
+                tag: form.value.tag,
+                updatedAt: now,
+              };
+              showToast('备忘已更新！', 'success');
+            }
+          } else {
+            memos.value.unshift({
+              id: generateId(),
+              title: form.value.title.trim(),
+              content: form.value.content.trim(),
+              tag: form.value.tag,
+              completed: false,
+              createdAt: now,
+              updatedAt: now,
+            });
+            showToast('备忘创建成功！', 'success');
+          }
+          closeModal();
+        }
+
+        function toggleComplete(id) {
+          const memo = memos.value.find(m => m.id === id);
+          if (memo) {
+            memo.completed = !memo.completed;
+            memo.updatedAt = Date.now();
+            showToast(memo.completed ? '已标记为完成 ✓' : '已恢复为进行中', 'info');
+          }
+        }
+
+        function confirmDelete(id) {
+          deleteTargetId.value = id;
+          showConfirm.value = true;
+        }
+
+        function doDelete() {
+          const id = deleteTargetId.value;
+          memos.value = memos.value.filter(m => m.id !== id);
+          showConfirm.value = false;
+          deleteTargetId.value = null;
+          showToast('备忘已删除', 'info');
+        }
+
+        // ==================== EXPORT ====================
+        function buildMemoText(memo) {
+          const tagName = tagLabels[memo.tag] || memo.tag;
+          const status = memo.completed ? '已完成' : '进行中';
+          const created = new Date(memo.createdAt).toLocaleString('zh-CN');
+          const updated = new Date(memo.updatedAt).toLocaleString('zh-CN');
+          return [
+            '═══════════════════════════════════',
+            `📌 ${memo.title}`,
+            '───────────────────────────────────',
+            `分类: ${tagName}   状态: ${status}`,
+            `创建: ${created}`,
+            `更新: ${updated}`,
+            '───────────────────────────────────',
+            memo.content,
+            '═══════════════════════════════════',
+            '',
+          ].join('\n');
+        }
+
+        function downloadAsFile(content, filename) {
+          const blob = new Blob(['﻿' + content], { type: 'text/plain;charset=utf-8' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = filename;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }
+
+        function exportMemo(memo) {
+          const text = buildMemoText(memo);
+          const filename = `备忘录_${memo.title.replace(/[\\/:*?"<>|]/g, '_')}.txt`;
+          downloadAsFile(text, filename);
+          showToast('📥 备忘已导出！', 'success');
+        }
+
+        function exportAllMemos() {
+          if (memos.value.length === 0) {
+            showToast('没有可导出的备忘', 'error');
+            return;
+          }
+          const now = new Date().toLocaleString('zh-CN');
+          let text = [
+            '═══════════════════════════════════',
+            '         📝 备忘录 - 全部导出        ',
+            `  用户: ${currentUser.value}`,
+            `  导出时间: ${now}`,
+            `  共 ${memos.value.length} 条备忘`,
+            '═══════════════════════════════════',
+            '',
+          ].join('\n');
+
+          memos.value.forEach((memo, i) => {
+            text += `\n【${i + 1}】${buildMemoText(memo)}`;
+          });
+
+          text += '\n═══════════════ 导出完毕 ═══════════════\n';
+
+          const filename = `备忘录_全部_${new Date().toISOString().slice(0, 10)}.txt`;
+          downloadAsFile(text, filename);
+          showToast(`📥 已导出全部 ${memos.value.length} 条备忘！`, 'success');
+        }
+
+        // ==================== TOAST ====================
+        function showToast(message, type = 'info') {
+          const id = ++toastIdCounter;
+          toasts.value.push({ id, message, type });
+          setTimeout(() => {
+            toasts.value = toasts.value.filter(t => t.id !== id);
+          }, 2600);
+        }
+
+        // ==================== LIFECYCLE ====================
+        onMounted(() => {
+          // Restore session
+          const savedSession = localStorage.getItem(SESSION_KEY);
+          if (savedSession) {
+            const users = getUsers();
+            if (users[savedSession]) {
+              currentUser.value = savedSession;
+              loadMemos();
+            } else {
+              localStorage.removeItem(SESSION_KEY);
+            }
+          }
+        });
+
+        // Esc to close modal
+        watch(showModal, (val) => {
+          if (val) {
+            const handler = (e) => {
+              if (e.key === 'Escape') { closeModal(); document.removeEventListener('keydown', handler); }
+            };
+            document.addEventListener('keydown', handler);
+          }
+        });
+
+        return {
+          // Auth
+          currentUser, loginMode, authForm, authErrors,
+          switchLoginMode, handleAuth, handleLogout,
+
+          // Memo state
+          memos, searchQuery, filterTag, sortBy, currentView, sidebarOpen,
+          showModal, isEditing, form, errors,
+          showConfirm, toasts,
+
+          // Constants
+          allTags, tagLabels,
+
+          // Computed
+          activeCount, completedCount, urgentCount, tagCounts,
+          pageTitle, filteredMemos,
+
+          // Methods
+          switchView, toggleSort, formatDate,
+          openAddModal, openEditModal, closeModal, saveMemo,
+          toggleComplete, confirmDelete, doDelete,
+          exportMemo, exportAllMemos,
+        };
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>
