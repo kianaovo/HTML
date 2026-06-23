@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>📝 在线备忘录</title>
+  <title> 在线备忘录</title>
   <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
   <style>
     /* ========== CSS Variables & Reset ========== */
@@ -160,6 +160,7 @@
     .app-layout {
       display: flex;
       min-height: 100vh;
+      background: var(--bg);
     }
 
     /* ========== Sidebar ========== */
@@ -307,6 +308,8 @@
       flex: 1;
       padding: 32px 36px;
       min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
     }
 
     /* ========== Header ========== */
@@ -454,6 +457,7 @@
       cursor: pointer;
       border: 2px solid var(--border);
       background: var(--card-bg);
+      color: var(--text);
       transition: all var(--transition);
       display: flex;
       align-items: center;
@@ -483,6 +487,7 @@
       flex-direction: column;
       gap: 12px;
       animation: fadeInUp 0.4s ease both;
+      cursor: pointer;
     }
 
     @keyframes fadeInUp {
@@ -807,6 +812,225 @@
     .confirm-dialog .confirm-actions { display: flex; gap: 12px; justify-content: center; }
 
     /* ========== Responsive ========== */
+    /* ========== Dark Mode ========== */
+    .app-layout.dark-mode {
+      --bg: #0f1729;
+      --card-bg: #1e293b;
+      --text: #eff2f5;
+      --text-light: #ecf0f6;
+      --border: #334155;
+      --shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+      --shadow-hover: 0 8px 32px rgba(0, 0, 0, 0.5);
+    }
+
+    .app-layout.dark-mode .stat-card .stat-icon.all      { background: #312E81; color: #A5B4FC; }
+    .app-layout.dark-mode .stat-card .stat-icon.work     { background: #1E3A5F; color: #93C5FD; }
+    .app-layout.dark-mode .stat-card .stat-icon.personal { background: #14532D; color: #86EFAC; }
+    .app-layout.dark-mode .stat-card .stat-icon.urgent   { background: #7F1D1D; color: #FCA5A5; }
+    .app-layout.dark-mode .stat-card .stat-icon.study    { background: #1E3A5F; color: #93C5FD; }
+
+    .app-layout.dark-mode .filter-tag { background: var(--card-bg); border-color: var(--border); }
+    .app-layout.dark-mode .sort-btn,
+    .app-layout.dark-mode .export-btn { background: var(--card-bg); border-color: var(--border); }
+
+    .app-layout.dark-mode .search-box input {
+      background: var(--card-bg);
+      color: var(--text);
+    }
+    .app-layout.dark-mode .search-box input::placeholder {
+      color: #64748b;
+    }
+
+    .app-layout.dark-mode .modal {
+      background: #1e293b;
+      color: #f1f5f9;
+    }
+    .app-layout.dark-mode .modal .form-group label {
+      color: #e2e8f0;
+    }
+    .app-layout.dark-mode .form-group input,
+    .app-layout.dark-mode .form-group textarea,
+    .app-layout.dark-mode .form-group select {
+      background: #0f1729;
+      color: #f1f5f9;
+      border-color: #334155;
+    }
+
+    .app-layout.dark-mode .confirm-dialog {
+      background: #1e293b;
+      color: #f1f5f9;
+    }
+    .app-layout.dark-mode .confirm-dialog p {
+      color: #94a3b8;
+    }
+
+    .app-layout.dark-mode .memo-card .memo-body::after {
+      background: linear-gradient(transparent, var(--card-bg));
+    }
+
+    .app-layout.dark-mode .btn-secondary {
+      background: #334155;
+      color: #e2e8f0;
+    }
+    .app-layout.dark-mode .btn-secondary:hover {
+      background: #475569;
+    }
+
+    .app-layout.dark-mode .empty-state h3,
+    .app-layout.dark-mode .empty-state p { color: #94a3b8; }
+
+    .app-layout.dark-mode .memo-tag.tag-work     { background: #312E81; color: #A5B4FC; }
+    .app-layout.dark-mode .memo-tag.tag-personal { background: #14532D; color: #86EFAC; }
+    .app-layout.dark-mode .memo-tag.tag-urgent   { background: #7F1D1D; color: #FCA5A5; }
+    .app-layout.dark-mode .memo-tag.tag-study    { background: #1E3A5F; color: #93C5FD; }
+    .app-layout.dark-mode .memo-tag.tag-other    { background: #334155; color: #CBD5E1; }
+
+    /* ========== Dark Mode Toggle Button ========== */
+    .dark-toggle {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      background: var(--card-bg);
+      cursor: pointer;
+      font-size: 1.2rem;
+      transition: all var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
+    .dark-toggle:hover {
+      border-color: var(--primary-light);
+      transform: rotate(20deg);
+    }
+
+    /* ========== Detail Modal ========== */
+    .detail-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .detail-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 36px;
+      width: 90%;
+      max-width: 600px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+      animation: slideUp 0.3s ease;
+      position: relative;
+    }
+
+    .detail-card .detail-close {
+      position: absolute;
+      top: 16px; right: 16px;
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      border: none;
+      background: var(--border);
+      cursor: pointer;
+      font-size: 1.1rem;
+      transition: all var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .detail-card .detail-close:hover {
+      background: #E17055;
+      color: #fff;
+    }
+
+    .detail-card .detail-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 20px;
+      padding-right: 40px;
+    }
+
+    .detail-card .detail-icon {
+      font-size: 2.5rem;
+      flex-shrink: 0;
+    }
+
+    .detail-card .detail-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.4;
+      word-break: break-word;
+    }
+
+    .detail-card .detail-meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 24px;
+      align-items: center;
+    }
+
+    .detail-card .detail-tag {
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+
+    .detail-card .detail-status {
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .detail-card .detail-status.active-status { background: #E0F2F1; color: #00897B; }
+    .detail-card .detail-status.done-status   { background: #F1F2F6; color: #636E72; }
+
+    .app-layout.dark-mode .detail-card .detail-status.active-status { background: #14532D; color: #86EFAC; }
+    .app-layout.dark-mode .detail-card .detail-status.done-status   { background: #334155; color: #CBD5E1; }
+
+    .detail-card .detail-content {
+      font-size: 1rem;
+      color: var(--text-light);
+      line-height: 1.8;
+      white-space: pre-wrap;
+      word-break: break-word;
+      margin-bottom: 24px;
+    }
+
+    .detail-card .detail-dates {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      font-size: 0.78rem;
+      color: var(--text-light);
+      opacity: 0.7;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .detail-card .detail-dates span {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .detail-card .detail-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ========== Responsive ========== */
     @media (max-width: 768px) {
       aside.sidebar {
         transform: translateX(-100%);
@@ -834,6 +1058,8 @@
       .mobile-menu-btn { display: flex !important; }
 
       .page-header h1 { font-size: 1.3rem; }
+
+      .detail-card { padding: 24px; }
     }
 
     .mobile-menu-btn {
@@ -919,7 +1145,7 @@
     </div>
 
     <!-- ========== MAIN APP ========== -->
-    <div v-else class="app-layout">
+    <div v-else class="app-layout" :class="{ 'dark-mode': darkMode }">
       <!-- Sidebar -->
       <aside class="sidebar" :class="{ open: sidebarOpen }">
         <div class="sidebar-brand">
@@ -972,6 +1198,9 @@
             <h1>{{ pageTitle }}</h1>
           </div>
           <div class="header-actions">
+            <button class="dark-toggle" @click="toggleDarkMode" :title="darkMode ? '切换到浅色模式' : '切换到深色模式'">
+              {{ darkMode ? '☀️' : '🌙' }}
+            </button>
             <div class="search-box">
               <span class="search-icon">🔍</span>
               <input type="text" v-model="searchQuery" placeholder="搜索备忘录...">
@@ -1048,15 +1277,16 @@
               :key="memo.id"
               class="memo-card"
               :class="['tag-' + memo.tag, { completed: memo.completed }]"
-              :style="{ animationDelay: (idx * 0.05) + 's' }"
+              :style="{ animationDelay: (idx * 0.05) + 's', cursor: 'pointer' }"
+              @click="openDetail(memo)"
             >
               <div class="card-header">
                 <h3 class="memo-title">{{ memo.title }}</h3>
                 <div class="card-actions">
-                  <button class="btn-complete" :title="memo.completed ? '标记为未完成' : '标记为已完成'" @click="toggleComplete(memo.id)">{{ memo.completed ? '↩️' : '✅' }}</button>
-                  <button class="btn-edit" title="编辑" @click="openEditModal(memo)">✏️</button>
-                  <button class="btn-export" title="导出为文本" @click="exportMemo(memo)">📥</button>
-                  <button class="btn-delete" title="删除" @click="confirmDelete(memo.id)">🗑️</button>
+                  <button class="btn-complete" :title="memo.completed ? '标记为未完成' : '标记为已完成'" @click.stop="toggleComplete(memo.id)">{{ memo.completed ? '↩️' : '✅' }}</button>
+                  <button class="btn-edit" title="编辑" @click.stop="openEditModal(memo)">✏️</button>
+                  <button class="btn-export" title="导出为文本" @click.stop="exportMemo(memo)">📥</button>
+                  <button class="btn-delete" title="删除" @click.stop="confirmDelete(memo.id)">🗑️</button>
                 </div>
               </div>
               <p class="memo-body">{{ memo.content }}</p>
@@ -1114,6 +1344,36 @@
         </form>
       </div>
 
+      <!-- Detail Modal -->
+      <div v-if="showDetail" class="detail-overlay" @click.self="closeDetail">
+        <div class="detail-card">
+          <button class="detail-close" @click="closeDetail">✕</button>
+          <div class="detail-header">
+            <div class="detail-icon">{{ detailMemo.completed ? '✅' : '📝' }}</div>
+            <h2 class="detail-title">{{ detailMemo.title }}</h2>
+          </div>
+          <div class="detail-meta-row">
+            <span class="detail-tag" :class="'tag-' + detailMemo.tag">{{ tagLabels[detailMemo.tag] }}</span>
+            <span class="detail-status" :class="detailMemo.completed ? 'done-status' : 'active-status'">
+              {{ detailMemo.completed ? '✔️ 已完成' : '🕐 进行中' }}
+            </span>
+          </div>
+          <div class="detail-content">{{ detailMemo.content }}</div>
+          <div class="detail-dates">
+            <span>📅 创建：{{ formatDateFull(detailMemo.createdAt) }}</span>
+            <span>🕐 更新：{{ formatDateFull(detailMemo.updatedAt) }}</span>
+          </div>
+          <div class="detail-actions">
+            <button class="btn btn-primary" @click="closeDetail(); toggleComplete(detailMemo.id)">
+              {{ detailMemo.completed ? '↩️ 标记为未完成' : '✅ 标记为已完成' }}
+            </button>
+            <button class="btn btn-primary" @click="closeDetail(); openEditModal(detailMemo)">✏️ 编辑</button>
+            <button class="btn btn-secondary" @click="closeDetail(); exportMemo(detailMemo)">📥 导出</button>
+            <button class="btn btn-danger" @click="closeDetail(); confirmDelete(detailMemo.id)">🗑️ 删除</button>
+          </div>
+        </div>
+      </div>
+
       <!-- Confirm Delete Dialog -->
       <div v-if="showConfirm" class="confirm-overlay" @click.self="showConfirm = false">
         <div class="confirm-dialog">
@@ -1162,9 +1422,16 @@
         const form = ref({ title: '', content: '', tag: '工作' });
         const errors = ref({ title: '', content: '' });
 
+        // Dark mode
+        const darkMode = ref(false);
+
         // Confirm dialog
         const showConfirm = ref(false);
         const deleteTargetId = ref(null);
+
+        // Detail modal
+        const showDetail = ref(false);
+        const detailMemo = ref(null);
 
         // Toast
         const toasts = ref([]);
@@ -1406,6 +1673,10 @@
           sidebarOpen.value = false;
         }
 
+        function toggleDarkMode() {
+          darkMode.value = !darkMode.value;
+        }
+
         function toggleSort() {
           sortBy.value = sortBy.value === 'newest' ? 'oldest' : 'newest';
         }
@@ -1426,6 +1697,24 @@
           const m = String(d.getMonth() + 1).padStart(2, '0');
           const day = String(d.getDate()).padStart(2, '0');
           return `${y}-${m}-${day}`;
+        }
+
+        function formatDateFull(timestamp) {
+          return new Date(timestamp).toLocaleString('zh-CN', {
+            year: 'numeric', month: '2-digit', day: '2-digit',
+            hour: '2-digit', minute: '2-digit',
+          });
+        }
+
+        // ==================== DETAIL MODAL ====================
+        function openDetail(memo) {
+          detailMemo.value = memo;
+          showDetail.value = true;
+        }
+
+        function closeDetail() {
+          showDetail.value = false;
+          detailMemo.value = null;
         }
 
         // ==================== MODAL ====================
@@ -1538,8 +1827,6 @@
             `📌 ${memo.title}`,
             '───────────────────────────────────',
             `分类: ${tagName}   状态: ${status}`,
-            `创建: ${created}`,
-            `更新: ${updated}`,
             '───────────────────────────────────',
             memo.content,
             '═══════════════════════════════════',
@@ -1627,6 +1914,16 @@
           }
         });
 
+        // Esc to close detail modal
+        watch(showDetail, (val) => {
+          if (val) {
+            const handler = (e) => {
+              if (e.key === 'Escape') { closeDetail(); document.removeEventListener('keydown', handler); }
+            };
+            document.addEventListener('keydown', handler);
+          }
+        });
+
         return {
           // Auth
           currentUser, loginMode, authForm, authErrors,
@@ -1637,6 +1934,12 @@
           showModal, isEditing, form, errors,
           showConfirm, toasts,
 
+          // Dark mode
+          darkMode, toggleDarkMode,
+
+          // Detail modal
+          showDetail, detailMemo, openDetail, closeDetail,
+
           // Constants
           allTags, tagLabels,
 
@@ -1645,7 +1948,7 @@
           pageTitle, filteredMemos,
 
           // Methods
-          switchView, toggleSort, formatDate,
+          switchView, toggleSort, formatDate, formatDateFull,
           openAddModal, openEditModal, closeModal, saveMemo,
           toggleComplete, confirmDelete, doDelete,
           exportMemo, exportAllMemos,
