@@ -1081,7 +1081,7 @@
     <!-- ========== LOGIN PAGE ========== -->
     <div v-if="!currentUser" class="login-page">
       <div class="login-card">
-        <div class="login-icon">📝</div>
+        <div class="login-icon"><img src="icons/biji.svg" width="36" height="36" alt=""></div>
         <h2>{{ loginMode === 'login' ? '欢迎回来' : '创建账户' }}</h2>
         <p class="login-subtitle">
           {{ loginMode === 'login' ? '登录以查看你的备忘录' : '注册一个新账户开始使用' }}
@@ -1130,7 +1130,7 @@
           </div>
 
           <button type="submit" class="btn-login">
-            {{ loginMode === 'login' ? '🔐 登 录' : '✨ 注 册' }}
+            {{ loginMode === 'login' ? '登 录' : '注 册' }}
           </button>
         </form>
         <div class="switch-mode">
@@ -1149,27 +1149,27 @@
       <!-- Sidebar -->
       <aside class="sidebar" :class="{ open: sidebarOpen }">
         <div class="sidebar-brand">
-          <span class="icon">📝</span> 备忘录
+          <span class="icon"><img src="icons/biji.svg" width="36" height="36" alt=""></span> 备忘录
         </div>
         <ul class="sidebar-nav">
           <li>
             <a :class="{ active: currentView === 'all' }" @click="switchView('all')">
-              📋 全部备忘 <span class="badge">{{ memos.length }}</span>
+              <img src="icons/biji.svg" width="20" height="20" alt=""> 全部备忘 <span class="badge">{{ memos.length }}</span>
             </a>
           </li>
           <li>
             <a :class="{ active: currentView === 'active' }" @click="switchView('active')">
-              ✅ 进行中 <span class="badge">{{ activeCount }}</span>
+              <img src="icons/进行中.svg" width="20" height="20" alt=""> 进行中 <span class="badge">{{ activeCount }}</span>
             </a>
           </li>
           <li>
             <a :class="{ active: currentView === 'completed' }" @click="switchView('completed')">
-              ✔️ 已完成 <span class="badge">{{ completedCount }}</span>
+             <img src="icons/dagou.svg" width="20" height="20" alt=""> 已完成 <span class="badge">{{ completedCount }}</span>
             </a>
           </li>
           <li>
             <a :class="{ active: currentView === 'urgent' }" @click="switchView('urgent')">
-              🔥 紧急事项 <span class="badge">{{ urgentCount }}</span>
+              <img src="icons/jinjichengdu.svg" width="20" height="20" alt=""> 紧急事项 <span class="badge">{{ urgentCount }}</span>
             </a>
           </li>
         </ul>
@@ -1205,42 +1205,42 @@
               <span class="search-icon">🔍</span>
               <input type="text" v-model="searchQuery" placeholder="搜索备忘录...">
             </div>
-            <button class="btn btn-primary" @click="openAddModal">✚ 新建</button>
+            <button class="btn btn-primary" @click="openAddModal"><img src="icons/biji.svg" width="16" height="16" alt=""> 新建</button>
           </div>
         </header>
 
         <!-- Stats Cards -->
         <section class="stats-row">
           <div class="stat-card" :class="{ selected: filterTag === '全部' }" @click="filterTag = '全部'">
-            <div class="stat-icon all">📋</div>
+            <div class="stat-icon all"><img src="icons/biji.svg" width="28" height="28" alt=""></div>
             <div class="stat-info">
               <div class="stat-num">{{ memos.length }}</div>
               <div class="stat-label">全部备忘</div>
             </div>
           </div>
           <div class="stat-card" :class="{ selected: filterTag === '工作' }" @click="filterTag = '工作'">
-            <div class="stat-icon work">💼</div>
+            <div class="stat-icon work"><img src="icons/gongzuo.svg" width="28" height="28" alt=""></div>
             <div class="stat-info">
               <div class="stat-num">{{ tagCounts['工作'] }}</div>
               <div class="stat-label">工作</div>
             </div>
           </div>
           <div class="stat-card" :class="{ selected: filterTag === '个人' }" @click="filterTag = '个人'">
-            <div class="stat-icon personal">🏠</div>
+            <div class="stat-icon personal"><img src="icons/geren.svg" width="28" height="28" alt=""></div>
             <div class="stat-info">
               <div class="stat-num">{{ tagCounts['个人'] }}</div>
               <div class="stat-label">个人</div>
             </div>
           </div>
           <div class="stat-card" :class="{ selected: filterTag === '紧急' }" @click="filterTag = '紧急'">
-            <div class="stat-icon urgent">🔥</div>
+            <div class="stat-icon urgent"><img src="icons/jinjichengdu.svg" width="28" height="28" alt=""></div>
             <div class="stat-info">
               <div class="stat-num">{{ tagCounts['紧急'] }}</div>
               <div class="stat-label">紧急</div>
             </div>
           </div>
           <div class="stat-card" :class="{ selected: filterTag === '学习' }" @click="filterTag = '学习'">
-            <div class="stat-icon study">📚</div>
+            <div class="stat-icon study"><img src="icons/xuexi-.svg" width="28" height="28" alt=""></div>
             <div class="stat-info">
               <div class="stat-num">{{ tagCounts['学习'] }}</div>
               <div class="stat-label">学习</div>
@@ -1261,7 +1261,7 @@
           </div>
           <div class="toolbar-right">
             <button class="export-btn" @click="exportAllMemos" title="导出全部备忘为文本文件">
-              📥 导出全部
+              <img src="icons/daochu.svg" width="16" height="16" alt=""> 导出全部
             </button>
             <button class="sort-btn" @click="toggleSort">
               {{ sortBy === 'newest' ? '🕐 最新优先' : '📅 最早优先' }}
@@ -1283,10 +1283,10 @@
               <div class="card-header">
                 <h3 class="memo-title">{{ memo.title }}</h3>
                 <div class="card-actions">
-                  <button class="btn-complete" :title="memo.completed ? '标记为未完成' : '标记为已完成'" @click.stop="toggleComplete(memo.id)">{{ memo.completed ? '↩️' : '✅' }}</button>
-                  <button class="btn-edit" title="编辑" @click.stop="openEditModal(memo)">✏️</button>
-                  <button class="btn-export" title="导出为文本" @click.stop="exportMemo(memo)">📥</button>
-                  <button class="btn-delete" title="删除" @click.stop="confirmDelete(memo.id)">🗑️</button>
+                  <button class="btn-complete" :title="memo.completed ? '标记为未完成' : '标记为已完成'" @click.stop="toggleComplete(memo.id)"><img :src="memo.completed ? 'icons/恢复.svg' : 'icons/dagou.svg'" width="16" height="16" alt=""></button>
+                  <button class="btn-edit" title="编辑" @click.stop="openEditModal(memo)"><img src="icons/bianji.svg" width="16" height="16" alt="编辑"></button>
+                  <button class="btn-export" title="导出为文本" @click.stop="exportMemo(memo)"><img src="icons/daochu.svg" width="16" height="16" alt="导出为文本"></button>
+                  <button class="btn-delete" title="删除" @click.stop="confirmDelete(memo.id)"><img src="icons/shanchu.svg" width="16" height="16" alt="删除"></button>
                 </div>
               </div>
               <p class="memo-body">{{ memo.content }}</p>
@@ -1297,7 +1297,7 @@
             </article>
           </template>
           <div v-else class="empty-state">
-            <div class="empty-icon">📭</div>
+            <div class="empty-icon"><img src="icons/biji.svg" width="64" height="64" alt=""></div>
             <h3>暂无备忘</h3>
             <p>点击右下角的 + 按钮或"新建"按钮来添加你的第一条备忘吧！</p>
           </div>
@@ -1310,7 +1310,10 @@
       <!-- Add/Edit Modal -->
       <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
         <form class="modal" @submit.prevent="saveMemo">
-          <h2>{{ isEditing ? '✏️ 编辑备忘' : '📝 新建备忘' }}</h2>
+          <h2>
+            <template v-if="isEditing"><img src="icons/bianji.svg" width="16" height="16" alt=""> 编辑备忘</template>
+            <template v-else><img src="icons/biji.svg" width="16" height="16" alt=""> 新建备忘</template>
+          </h2>
 
           <div class="form-group" :class="{ error: errors.title }">
             <label for="memoTitle">标题 *</label>
@@ -1327,18 +1330,19 @@
           <div class="form-group">
             <label for="memoTag">分类标签</label>
             <select id="memoTag" v-model="form.tag">
-              <option value="工作">💼 工作</option>
-              <option value="个人">🏠 个人</option>
-              <option value="紧急">🔥 紧急</option>
-              <option value="学习">📚 学习</option>
-              <option value="其他">📌 其他</option>
+              <option value="工作">工作</option>
+              <option value="个人">个人</option>
+              <option value="紧急">紧急</option>
+              <option value="学习">学习</option>
+              <option value="其他">其他</option>
             </select>
           </div>
 
           <div class="modal-actions">
             <button type="button" class="btn btn-secondary" @click="closeModal">取消</button>
             <button type="submit" class="btn btn-primary">
-              {{ isEditing ? '💾 保存修改' : '✅ 创建备忘' }}
+              <template v-if="isEditing"><img src="icons/保存.svg" width="16" height="16" alt=""> 保存修改</template>
+              <template v-else><img src="icons/dagou.svg" width="16" height="16" alt=""> 创建备忘</template>
             </button>
           </div>
         </form>
@@ -1349,13 +1353,17 @@
         <div class="detail-card">
           <button class="detail-close" @click="closeDetail">✕</button>
           <div class="detail-header">
-            <div class="detail-icon">{{ detailMemo.completed ? '✅' : '📝' }}</div>
+            <div class="detail-icon">
+              <img v-if="detailMemo.completed" src="icons/dagou.svg" width="24" height="24" alt="">
+              <img v-else src="icons/biji.svg" width="24" height="24" alt="">
+            </div>
             <h2 class="detail-title">{{ detailMemo.title }}</h2>
           </div>
           <div class="detail-meta-row">
             <span class="detail-tag" :class="'tag-' + detailMemo.tag">{{ tagLabels[detailMemo.tag] }}</span>
             <span class="detail-status" :class="detailMemo.completed ? 'done-status' : 'active-status'">
-              {{ detailMemo.completed ? '✔️ 已完成' : '🕐 进行中' }}
+              <template v-if="detailMemo.completed"><img src="icons/dagou.svg" width="16" height="16" alt=""> 已完成</template>
+              <template v-else><img src="icons/进行中.svg" width="16" height="16" alt=""> 进行中</template>
             </span>
           </div>
           <div class="detail-content">{{ detailMemo.content }}</div>
@@ -1364,12 +1372,13 @@
             <span>🕐 更新：{{ formatDateFull(detailMemo.updatedAt) }}</span>
           </div>
           <div class="detail-actions">
-            <button class="btn btn-primary" @click="closeDetail(); toggleComplete(detailMemo.id)">
-              {{ detailMemo.completed ? '↩️ 标记为未完成' : '✅ 标记为已完成' }}
+            <button class="btn btn-primary" @click="toggleComplete(detailMemo.id); closeDetail()">
+              <template v-if="detailMemo.completed"><img src="icons/恢复.svg" width="16" height="16" alt=""> 标记为未完成</template>
+              <template v-else><img src="icons/dagou.svg" width="16" height="16" alt=""> 标记为已完成</template>
             </button>
-            <button class="btn btn-primary" @click="closeDetail(); openEditModal(detailMemo)">✏️ 编辑</button>
-            <button class="btn btn-secondary" @click="closeDetail(); exportMemo(detailMemo)">📥 导出</button>
-            <button class="btn btn-danger" @click="closeDetail(); confirmDelete(detailMemo.id)">🗑️ 删除</button>
+            <button class="btn btn-primary" @click="openEditModal(detailMemo); closeDetail()"><img src="icons/bianji.svg" width="16" height="16" alt=""> 编辑</button>
+            <button class="btn btn-secondary" @click="exportMemo(detailMemo); closeDetail()"><img src="icons/daochu.svg" width="16" height="16" alt=""> 导出</button>
+            <button class="btn btn-danger" @click="confirmDelete(detailMemo.id); closeDetail()"><img src="icons/shanchu.svg" width="16" height="16" alt=""> 删除</button>
           </div>
         </div>
       </div>
